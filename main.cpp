@@ -8,7 +8,7 @@ int ledLow = 0;
 
 int cutOffTrigger = 0;
 
-int sensitivity = 3;
+int threshold = 100;
 
 unsigned long startTime = 0;
 unsigned long finishTime = 0;
@@ -25,33 +25,41 @@ double average = 0;
 void setup()
 {
   // put your setup code here, to run once:
-
+  bool isCalibrated = false;
   Serial.begin(9600);
 
   pinMode(ledPin, OUTPUT);
-
   pinMode(lightSensorPin, INPUT);
 
-  Serial.println("Calibrating....");
+  while(!isCalibrated) {
+    Serial.println("Calibrating....");
 
-  digitalWrite(ledPin, HIGH);
-  delay(1000);
-  ledHigh = analogRead(lightSensorPin);
+    digitalWrite(ledPin, HIGH);
+    delay(1000);
+    ledHigh = analogRead(lightSensorPin);
+    digitalWrite(ledPin, LOW);
+    delay(1000);
+    ledLow = analogRead(lightSensorPin);
+    digitalWrite(ledPin, LOW);
 
-  digitalWrite(ledPin, LOW);
-  delay(1000);
-  ledLow = analogRead(lightSensorPin);
-  digitalWrite(ledPin, LOW);
+    if(ledLow - ledHigh >= 300) {
+      cutOffTrigger = ledHigh + threshold;
+      isCalibrated = true;
+      Serial.println("Calibration complete...");
+    } else {
+      Serial.println("Calibration failed. Trying again...");
+    }
+    delay(1000);
+    // cutOffTrigger = (ledHigh + ledLow) / 2;
+  }
 
-  cutOffTrigger = (ledHigh + ledLow) / 2;
-
-  Serial.print("ledHigh: ");
+  Serial.print("ledHigh:\t");
   Serial.println((int)ledHigh);
-  Serial.print("ledLow: ");
+  Serial.print("ledLow:\t");
   Serial.println((int)ledLow);
-  Serial.print("curOffTrigger: ");
+  Serial.print("cutOffTrigger:\t");
   Serial.println((int)cutOffTrigger);
-
+  delay(1000)
   Serial.println("beginning loop");
 }
 
@@ -71,16 +79,11 @@ void loop()
   digitalWrite(ledPin, HIGH);
   startTime = micros();
 
-  while (analogRead(lightSensorPin) > cutOffTrigger)
-  {
-  }
+  while (analogRead(lightSensorPin) > cutOffTrigger){}
 
-  finishTime = micros();
-  
+  finishTime = micros();  
   digitalWrite(ledPin, LOW);
-
   deltaTime = (double)finishTime - (double)startTime;
-
 
   runningAverage(&average, deltaTime);
 
