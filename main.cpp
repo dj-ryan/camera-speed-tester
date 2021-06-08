@@ -4,7 +4,7 @@ uint8_t ledPin = 3;
 uint8_t lightSensorPin = A1;
 
 int ledHigh = 0;
-int_fast16_t ledLow = 0;
+int ledLow = 0;
 
 int cutOffTrigger = 0;
 
@@ -15,7 +15,7 @@ unsigned long finishTime = 0;
 
 double deltaTime = 0;
 
-double averageLookback = 50;
+double averageLookback = 10;
 
 double average = 0;
 
@@ -43,7 +43,7 @@ void setup()
   ledLow = analogRead(lightSensorPin);
   digitalWrite(ledPin, LOW);
 
-  cutOffTrigger = (ledHigh + (sensitivity * ledLow)) / (sensitivity + 1);
+  cutOffTrigger = (ledHigh + ledLow) / 2;
 
   Serial.print("ledHigh: ");
   Serial.println((int)ledHigh);
@@ -84,12 +84,12 @@ void loop()
 
   runningAverage(&average, deltaTime);
 
-  Serial.print("deltaTime: ");
+  Serial.print("deltaTime:\t");
   Serial.print(deltaTime / 1000, 4);
-  Serial.print("ms  |   Running Average: ");
+  Serial.print("ms  |  Running Average:\t");
   Serial.print(average / 1000, 4);
   Serial.println("ms");
 
-  delay(100);
+  delay(300);
 }
 
