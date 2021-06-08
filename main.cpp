@@ -15,12 +15,8 @@ unsigned long finishTime = 0;
 
 double deltaTime = 0;
 
-double averageLookback = 10;
-
+double averageLookback = 50;
 double average = 0;
-
-
-
 
 void setup()
 {
@@ -63,15 +59,12 @@ void setup()
   Serial.println("beginning loop");
 }
 
-
 void runningAverage(double * average, double newValue){
 
   *average -= *average / averageLookback;
   *average += newValue / averageLookback;
 
 }
-
-
 
 void loop()
 {
